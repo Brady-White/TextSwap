@@ -35,18 +35,18 @@ def register_user():
         )
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         
+        # Generate an email verification link
+        verification_link = auth.generate_email_verification_link(email)
+
+        # Send verification email
+        send_verification_email(email, verification_link)
+
         # Save user data to Firestore
         user_data = {
             'email': email,
             'password': hashed_password
         }
         db.collection('users').document(user.uid).set(user_data)
-
-        # Generate an email verification link
-        verification_link = auth.generate_email_verification_link(email)
-
-        # Send verification email
-        send_verification_email(email, verification_link)
 
         return jsonify({"message": "Verification email sent successfully"}), 201
 
@@ -58,8 +58,8 @@ def send_verification_email(email, verification_link):
     # SMTP server configuration (example using Gmail)
     smtp_server = 'smtp.gmail.com'
     smtp_port = 587
-    smtp_user = 'textswap1@gmail.com'  # Replace with your email
-    smtp_password = 'nqgsvuabnzuehrho'  # Replace with your app password
+    smtp_user = 'textswap1@gmail.com'  
+    smtp_password = 'nqgsvuabnzuehrho'  
 
     subject = "Verify your email for TextSwap"
     body = f"Hi, please verify your email by clicking the link: {verification_link} \n\nThank you, \nTextSwap Support"
@@ -93,13 +93,19 @@ def user_login():
         return jsonify({'error': 'Email and password are required'}), 400
 
     try:
+        # Retrieve user by email from Firebase Auth
+        user = auth.get_user_by_email(email)
+
+        # Check if the user's email is verified
+        if not user.email_verified:
+            return jsonify({'error': 'Please verify your email before logging in'}), 403
+
         # Retrieve user data from Firestore
-        user_ref = db.collection('users').where('email', '==', email).get()
-        if not user_ref:
+        user_ref = db.collection('users').document(user.uid).get()
+        if not user_ref.exists:
             return jsonify({'error': 'Invalid email or password'}), 401
 
-        # Since 'where' can return multiple results, we will assume the first one is correct
-        user_data = user_ref[0].to_dict()
+        user_data = user_ref.to_dict()
         hashed_password = user_data.get('password')
 
         # Verify the password
@@ -107,15 +113,13 @@ def user_login():
             return jsonify({'error': 'Invalid email or password'}), 401
 
         # Generate a custom Firebase token for the user
-        user_id = user_ref[0].id
-        token = auth.create_custom_token(user_id)
+        token = auth.create_custom_token(user.uid)
 
         return jsonify({'token': token.decode('utf-8')}), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-
-
+    
+    
 if __name__ == '__main__':
     app.run(debug=True)
