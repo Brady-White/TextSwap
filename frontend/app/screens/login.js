@@ -14,7 +14,7 @@ const LoginScreen = ({ navigation }) => {
                 password: password,
             });
             // Assuming successful login
-            navigation.navigate('Home'); // Navigate to the 'Home' screen (create it if it exists)
+            navigation.navigate('Dashboard'); // Navigate to the 'Dashboard' screen
             setError('');
         } catch (error) {
             setError(error.response?.data?.error || 'Login failed');
