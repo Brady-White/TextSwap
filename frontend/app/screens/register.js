@@ -5,14 +5,18 @@ import axios from 'axios';
 const RegisterScreen = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [name, setName] = useState('');
+    const [university, setUniversity] = useState('');
     const [verificationLink, setVerificationLink] = useState('');
     const [error, setError] = useState('');
 
     const handleRegister = async () => {
         try {
             const response = await axios.post('http://localhost:5000/register', {
-                email: email,
-                password: password,
+                email,
+                password,
+                name,
+                university
             });
             setVerificationLink(response.data.message);
             setError('');
@@ -29,6 +33,18 @@ const RegisterScreen = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Register</Text>
+            <TextInput
+                style={styles.input}
+                placeholder="Name"
+                value={name}
+                onChangeText={setName}
+            />
+            <TextInput
+                style={styles.input}
+                placeholder="University"
+                value={university}
+                onChangeText={setUniversity}
+            />
             <TextInput
                 style={styles.input}
                 placeholder="Email"

@@ -23,9 +23,11 @@ def register_user():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
+    name = data.get('name')
+    university = data.get('university')
 
-    if not email or not password:
-        return jsonify({'error': 'Email and password are required'}), 400
+    if not email or not password or not name or not university:
+        return jsonify({'error': 'All fields (name, university, email, password) are required'}), 400
 
     try:
         # Create a new user with email and password
@@ -44,7 +46,9 @@ def register_user():
         # Save user data to Firestore
         user_data = {
             'email': email,
-            'password': hashed_password
+            'password': hashed_password,
+            'name': name,
+            'university': university
         }
         db.collection('users').document(user.uid).set(user_data)
 
@@ -52,8 +56,8 @@ def register_user():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 400
-
-
+    
+    
 def send_verification_email(email, verification_link):
     # SMTP server configuration (example using Gmail)
     smtp_server = 'smtp.gmail.com'
@@ -120,6 +124,6 @@ def user_login():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
-    
+
 if __name__ == '__main__':
     app.run(debug=True)
