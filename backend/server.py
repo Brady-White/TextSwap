@@ -57,7 +57,7 @@ def register_user():
     except Exception as e:
         return jsonify({'error': str(e)}), 400
     
-    
+
 def send_verification_email(email, verification_link):
     # SMTP server configuration (example using Gmail)
     smtp_server = 'smtp.gmail.com'
@@ -123,7 +123,41 @@ def user_login():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/create_listing', methods=['POST'])
+def create_listing():
+    data = request.get_json()
+    title = data.get('title')
+    author = data.get('author')
+    course_number = data.get('course_number')
+    condition = data.get('condition')
+    price = data.get('price')
+    other_desired_titles = data.get('other_desired_titles')
+    user_email = data.get('user_email')  # Assume this comes from the request
     
+    # Check for missing fields
+    if not title or not author or not course_number or not condition or not price or not user_email:
+        return jsonify({'error': 'All fields are required'}), 400
+
+    # Prepare listing data
+    listing_data = {
+        'title': title,
+        'author': author,
+        'course_number': course_number,
+        'condition': condition,
+        'price': price,
+        'other_desired_titles': other_desired_titles,
+        'user_email': user_email,
+    }
+
+    try:
+        # Add the listing to Firestore
+        db.collection('listings').add(listing_data)
+        return jsonify({"message": "Listing created successfully"}), 201
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)

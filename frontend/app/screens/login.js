@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import axios from 'axios';
+import { useUser } from './UserContext';
 
 const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const { setUser } = useUser();
 
     const handleLogin = async () => {
         try {
@@ -13,9 +15,10 @@ const LoginScreen = ({ navigation }) => {
                 email: email,
                 password: password,
             });
-            // Assuming successful login
-            navigation.navigate('Dashboard'); // Navigate to the 'Dashboard' screen
+            // Set the user’s email in context after successful login
+            setUser({ email });
             setError('');
+            navigation.navigate('Dashboard'); // Navigate to the Dashboard
         } catch (error) {
             setError(error.response?.data?.error || 'Login failed');
         }
