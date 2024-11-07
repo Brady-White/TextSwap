@@ -2,13 +2,14 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import firebase_admin
 from firebase_admin import credentials, auth, firestore
 import bcrypt
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "http://localhost:8081"}}, supports_credentials=True, allow_headers=["Content-Type"], methods=["POST", "GET", "OPTIONS"])
+
 
 # Initialize Firebase Admin SDK
 cred = credentials.Certificate('./credentials/textswapfinal-firebase-adminsdk-v2sag-561a397a16.json')
@@ -18,7 +19,8 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 # Function to register a new user
-@app.route('/register', methods=['POST'])
+@app.route('/register', methods=['POST', 'OPTIONS'])
+@cross_origin(origin='http://localhost:8081', supports_credentials=True)
 def register_user():
     data = request.get_json()
     email = data.get('email')
@@ -160,4 +162,5 @@ def create_listing():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=2222, debug=True)
+
