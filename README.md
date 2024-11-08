@@ -1,3 +1,3 @@
 TextSwap
 
-Authors: William Jesser, Brady White, Max Martin
+Authors: William Jesser, Brady White, Max Martin 
